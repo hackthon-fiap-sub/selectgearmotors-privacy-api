@@ -1,0 +1,16 @@
+{
+    "name": "data-deletion-api",
+    "version": "1.0.0",
+    "description": "API for managing data deletion requests based on LPGD",
+    "main": "src/app.js",
+    "dependencies": {
+      "aws-sdk": "^2.814.0"
+    },
+    "devDependencies": {},
+    "scripts": {
+      "start": "node src/app.js"
+    },
+    "author": "",
+    "license": "ISC"
+  }
+  

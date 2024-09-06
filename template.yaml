@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+  SnsTopicArn:
+    Type: String
+    Description: ARN of the existing SNS Topic for Data Deletion Requests
+
+Resources:
+  DeleteDataRequestFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/app.handler
+      Runtime: nodejs18.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref RemoveClientData
+          SNS_TOPIC_ARN: !Ref SnsTopicArn
+      Policies:
+        - Statement:
+            Effect: Allow
+            Action:
+              - dynamodb:PutItem
+              - dynamodb:Scan
+              - dynamodb:UpdateItem
+            Resource: !GetAtt RemoveClientData.Arn
+        - Statement:
+            Effect: Allow
+            Action:
+              - sns:Publish
+            Resource: !Ref SnsTopicArn
+      Events:
+        CreateRequestEvent:
+          Type: Api
+          Properties:
+            Path: /delete-request
+            Method: post
+        ListRequestsEvent:
+          Type: Api
+          Properties:
+            Path: /delete-requests
+            Method: get
+        UpdateRequestStatusEvent:
+          Type: Api
+          Properties:
+            Path: /delete-request/{requestId}/status
+            Method: put
+  RemoveClientData:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: RemoveClientData
+      AttributeDefinitions:
+        - AttributeName: requestId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: requestId
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+Outputs:
+  DeleteDataRequestFunction:
+    Description: "Endpoint for the Delete Data Request function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete-request"
+  ListDataRequestsFunction:
+    Description: "Endpoint for listing all Delete Data Requests"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete-requests"
+  UpdateRequestStatusFunction:
+    Description: "Endpoint for updating the status of a Delete Data Request"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete-request/{requestId}/status"
