@@ -13,7 +13,7 @@ Resources:
       Runtime: nodejs18.x
       Environment:
         Variables:
-          TABLE_NAME: !Ref RemoveClientData
+          TABLE_NAME: !Ref RemoveClientDatas
           SNS_TOPIC_ARN: !Ref SnsTopicArn
       Policies:
         - Statement:
@@ -22,7 +22,7 @@ Resources:
               - dynamodb:PutItem
               - dynamodb:Scan
               - dynamodb:UpdateItem
-            Resource: !GetAtt RemoveClientData.Arn
+            Resource: !GetAtt RemoveClientDatas.Arn
         - Statement:
             Effect: Allow
             Action:
@@ -44,10 +44,10 @@ Resources:
           Properties:
             Path: /delete-request/{requestId}/status
             Method: put
-  RemoveClientData:
+  RemoveClientDatas:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: RemoveClientData
+      TableName: RemoveClientDatas
       AttributeDefinitions:
         - AttributeName: requestId
           AttributeType: S
